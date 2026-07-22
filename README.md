@@ -1,5 +1,5 @@
 ````md
-# 📘 React Study Notes
+#  React Study Notes
 
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
@@ -11,18 +11,18 @@
 
 Beginner-friendly React notes with clear explanations, practical examples, diagrams, interview questions, and hands-on practice.
 
-## ✨ Features
+##  Features
 
-- 📖 Easy-to-understand explanations
-- 💡 Real-world examples
-- 🧩 React Hooks covered
-- 📝 Interview questions
-- ⚠️ Common mistakes & best practices
-- 💻 Code examples with explanations
-- 📱 Responsive notebook-style UI
-- 🌙 Dark mode support
+-  Easy-to-understand explanations
+-  Real-world examples
+-  React Hooks covered
+-  Interview questions
+-  Common mistakes & best practices
+-  Code examples with explanations
+-  Responsive notebook-style UI
+-  Dark mode support
 
-## 📚 Topics Covered
+##  Topics Covered
 
 - React Introduction
 - JSX
@@ -42,21 +42,4 @@ Beginner-friendly React notes with clear explanations, practical examples, diagr
 - React Router
 - Component Lifecycle
 
-## 🚀 Getting Started
-
-Clone the repository:
-
-```bash
-git clone https://github.com/your-username/react-study-notes.git
-```
-
-Open the HTML file in your browser or deploy it using GitHub Pages.
-
-## 🤝 Contributing
-
-Suggestions and improvements are always welcome. Feel free to open an issue or submit a pull request.
-
-## 📄 License
-
-This project is licensed under the MIT License.
 ````
