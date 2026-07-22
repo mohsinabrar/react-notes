@@ -1,0 +1,745 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>React Hooks — Study Notes</title><link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Patrick+Hand&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"/><style>
+ :root {
+ --paper: #fdf9f0;
+ --paper2: #fffdf7;
+ --ink: #1a1a2e;
+ --ink2: #2c2c54;
+ --blue: #1565c0;
+ --red: #c62828;
+ --green: #2e7d32;
+ --orange: #e65100;
+ --purple: #6a1b9a;
+ --yellow-hl: #fff176;
+ --pink-hl: #fce4ec;
+ --blue-hl: #e3f2fd;
+ --green-hl: #e8f5e9;
+ --line: #c5b7a0;
+ --tab-active: #1565c0;
+ --shadow: 0 4px 16px rgba(0,0,0,0.13);
+ }
+
+ * { box-sizing: border-box; margin: 0; padding: 0; }
+
+ body {
+ background: #e8dcc8;
+ background-image:
+ radial-gradient(circle at 20% 50%, rgba(150,130,100,0.08) 0%, transparent 50%),
+ radial-gradient(circle at 80% 20%, rgba(180,160,120,0.06) 0%, transparent 40%);
+ font-family: 'Patrick Hand', cursive;
+ min-height: 100vh;
+ padding: 20px 12px 40px;
+ }
+
+ /* ── HEADER ── */
+ .header {
+ text-align: center;
+ margin-bottom: 28px;
+ }
+ .header h1 {
+ font-family: 'Caveat', cursive;
+ font-size: 2.8rem;
+ font-weight: 700;
+ color: var(--ink2);
+ text-shadow: 2px 2px 0 rgba(0,0,0,0.08);
+ line-height: 1.1;
+ }
+ .header .subtitle {
+ font-size: 1.1rem;
+ color: #6d5b3b;
+ margin-top: 4px;
+ letter-spacing: 0.3px;
+ }
+ .header .badge {
+ display: inline-block;
+ background: var(--tab-active);
+ color: #fff;
+ font-family: 'Caveat', cursive;
+ font-size: 1rem;
+ padding: 3px 14px;
+ border-radius: 20px;
+ margin-top: 8px;
+ letter-spacing: 0.5px;
+ }
+
+ /* ── TAB BAR ── */
+ .tab-bar {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 6px;
+ justify-content: center;
+ margin-bottom: 24px;
+ }
+ .tab-btn {
+ font-family: 'Caveat', cursive;
+ font-size: 1rem;
+ font-weight: 600;
+ padding: 7px 16px;
+ border: 2px solid #b0a080;
+ border-radius: 8px;
+ background: var(--paper);
+ color: #5a4a2a;
+ cursor: pointer;
+ transition: all 0.18s;
+ box-shadow: 2px 2px 0 rgba(0,0,0,0.10);
+ position: relative;
+ }
+ .tab-btn:hover { background: #fff8e6; transform: translateY(-1px); }
+ .tab-btn.active {
+ background: var(--tab-active);
+ color: #fff;
+ border-color: var(--tab-active);
+ box-shadow: 2px 3px 0 rgba(21,101,192,0.25);
+ transform: translateY(-2px);
+ }
+ .tab-num {
+ position: absolute;
+ top: -8px; right: -8px;
+ background: var(--red);
+ color: #fff;
+ font-size: 0.68rem;
+ width: 18px; height: 18px;
+ border-radius: 50%;
+ display: flex; align-items: center; justify-content: center;
+ font-family: sans-serif;
+ font-weight: 700;
+ line-height: 1;
+ }
+
+ /* ── NOTEBOOK ── */
+ .notebook {
+ max-width: 860px;
+ margin: 0 auto;
+ background: var(--paper);
+ border-radius: 4px;
+ box-shadow: var(--shadow), 6px 6px 0 rgba(0,0,0,0.08);
+ position: relative;
+ overflow: hidden;
+ }
+ /* Spiral holes */
+ .notebook::before {
+ content: '';
+ position: absolute;
+ top: 0; left: 36px;
+ width: 2px; height: 100%;
+ background: var(--red);
+ opacity: 0.5;
+ z-index: 2;
+ }
+ .spiral-holes {
+ position: absolute;
+ top: 0; left: 0;
+ width: 36px; height: 100%;
+ background: #d4c8b0;
+ z-index: 1;
+ display: flex; flex-direction: column; align-items: center;
+ padding-top: 32px; gap: 48px;
+ }
+ .hole {
+ width: 18px; height: 18px;
+ border-radius: 50%;
+ background: #e8dcc8;
+ border: 2px solid #b0a080;
+ flex-shrink: 0;
+ }
+
+ .content {
+ margin-left: 52px;
+ padding: 28px 32px 40px 20px;
+ position: relative;
+ background-image: repeating-linear-gradient(
+ transparent,
+ transparent 31px,
+ var(--line) 31px,
+ var(--line) 32px
+ );
+ background-position: 0 40px;
+ min-height: 600px;
+ }
+
+ .topic-page { display: none; }
+ .topic-page.active { display: block; }
+
+ /* ── TOPIC HEADER ── */
+ .topic-header {
+ text-align: center;
+ padding: 10px 0 24px;
+ border-bottom: 3px dashed var(--line);
+ margin-bottom: 24px;
+ }
+ .topic-eyebrow { font-family: 'Fira Code', monospace; font-size: 0.78rem; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange); margin-bottom: 6px; }
+ .topic-title {
+ font-family: 'Caveat', cursive;
+ font-size: 2.4rem;
+ font-weight: 700;
+ color: var(--ink2);
+ }
+ .topic-sub {
+ font-size: 1.05rem;
+ color: #6d5b3b;
+ margin-top: 3px;
+ }
+
+ /* ── SECTIONS ── */
+ .section {
+ margin-bottom: 30px;
+ }
+ .section-title {
+ font-family: 'Caveat', cursive;
+ font-size: 1.5rem;
+ font-weight: 700;
+ color: var(--blue);
+ border-bottom: 2px solid var(--blue);
+ padding-bottom: 2px;
+ margin-bottom: 12px;
+ display: flex; align-items: center; gap: 8px;
+ }
+
+ /* ── TEXT STYLES ── */
+ p, li { font-size: 1.05rem; color: var(--ink); line-height: 1.75; }
+ .arrow { color: var(--orange); font-weight: 700; }
+
+ /* BOX STYLES */
+ .box {
+ border: 2px solid;
+ border-radius: 6px;
+ padding: 12px 16px;
+ margin: 12px 0;
+ position: relative;
+ background: var(--paper2);
+ }
+ .box-blue { border-color: var(--blue); background: var(--blue-hl); }
+ .box-green { border-color: var(--green); background: var(--green-hl); }
+ .box-red { border-color: var(--red); background: var(--pink-hl); }
+ .box-yellow { border-color: #f9a825; background: #fffde7; }
+ .box-purple { border-color: var(--purple); background: #f3e5f5; }
+ .box-orange { border-color: var(--orange); background: #fff3e0; }
+ .box-label {
+ font-family: 'Caveat', cursive;
+ font-size: 0.85rem;
+ font-weight: 700;
+ position: absolute;
+ top: -12px; left: 12px;
+ background: var(--paper);
+ padding: 0 6px;
+ border-radius: 4px;
+ }
+ .box-blue .box-label { color: var(--blue); }
+ .box-green .box-label { color: var(--green); }
+ .box-red .box-label { color: var(--red); }
+ .box-yellow .box-label { color: #f57f17; }
+ .box-purple .box-label { color: var(--purple); }
+ .box-orange .box-label { color: var(--orange); }
+
+ /* CODE BLOCKS */
+ .code-wrap {
+ margin: 14px 0;
+ border-radius: 8px;
+ overflow: hidden;
+ box-shadow: 2px 3px 0 rgba(0,0,0,0.12);
+ }
+ .code-header {
+ background: #263238;
+ color: #90a4ae;
+ font-family: 'Fira Code', monospace;
+ font-size: 0.78rem;
+ padding: 6px 14px;
+ display: flex; align-items: center; gap: 8px;
+ }
+ .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+ .cd-r { background: #ef5350; }
+ .cd-y { background: #ffca28; }
+ .cd-g { background: #66bb6a; }
+ pre {
+ background: #1e272c;
+ color: #eceff1;
+ padding: 16px;
+ font-family: 'Fira Code', monospace;
+ font-size: 0.88rem;
+ line-height: 1.65;
+ overflow-x: auto;
+ margin: 0;
+ white-space: pre;
+ }
+ .kw { color: #80cbc4; } /* keyword */
+ .fn { color: #82aaff; } /* function */
+ .str { color: #c3e88d; } /* string */
+ .num { color: #f78c6c; } /* number */
+ .cm { color: #546e7a; font-style: italic; } /* comment */
+ .tag { color: #f07178; } /* JSX tag */
+ .attr { color: #ffcb6b; } /* attribute */
+ .var { color: #eeffff; }
+ .op { color: #89ddff; } /* operator */
+
+ /* HIGHLIGHTS */
+ .hl-y { background: var(--yellow-hl); padding: 0 3px; border-radius: 3px; }
+ .hl-p { background: #e8d5f5; padding: 0 3px; border-radius: 3px; }
+ .star { color: #f9a825; }
+
+ /* BULLETS */
+ ul, ol { padding-left: 22px; }
+ ul { list-style: none; }
+ ul li::before { content: "→ "; color: var(--orange); font-weight: 700; }
+ ol li { list-style: decimal; }
+
+ /* INTERVIEW Q&A */
+ .qa-item { margin-bottom: 16px; }
+ .q { font-weight: 700; color: var(--purple); font-size: 1.05rem; }
+ .q::before { content: "Q: "; }
+ .a { color: #2c2c54; font-size: 1rem; padding-left: 14px; border-left: 3px solid var(--purple); margin-top: 4px; }
+ .a::before { content: "A: "; font-weight: 700; color: var(--green); }
+
+ /* TRICK BOX */
+ .trick {
+ background: #fffde7;
+ border: 2px dashed #f9a825;
+ border-radius: 8px;
+ padding: 10px 14px;
+ margin: 10px 0;
+ font-size: 1rem;
+ }
+ .trick::before { content: "Tip: "; font-weight: 700; color: #f57f17; }
+
+ /* MISTAKE ITEM */
+ .mistake { margin-bottom: 10px; }
+ .mistake-q { color: var(--red); font-weight: 700; }
+ .mistake-q::before { content: "Mistake — "; }
+ .mistake-a { color: var(--green); padding-left: 14px; border-left: 3px solid var(--green); margin-top: 3px; }
+ .mistake-a::before { content: "Fix — "; font-weight: 700; }
+
+ /* REVISION BOX */
+ .revision {
+ background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+ border: 3px solid var(--blue);
+ border-radius: 10px;
+ padding: 16px 20px;
+ margin-top: 24px;
+ }
+ .revision h3 {
+ font-family: 'Caveat', cursive;
+ font-size: 1.4rem;
+ color: var(--blue);
+ margin-bottom: 10px;
+ }
+
+ /* LINE BREAKDOWN */
+ .breakdown-row {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: 8px;
+ margin: 6px 0;
+ padding: 6px 10px;
+ background: rgba(255,255,255,0.7);
+ border-radius: 5px;
+ border-left: 3px solid var(--orange);
+ }
+ .breakdown-code { font-family: 'Fira Code', monospace; font-size: 0.82rem; color: #37474f; }
+ .breakdown-exp { font-size: 0.93rem; color: var(--ink2); }
+
+ /* SEPARATOR */
+ .sep {
+ text-align: center;
+ color: #b0a080;
+ font-size: 1.2rem;
+ margin: 10px 0;
+ letter-spacing: 4px;
+ }
+
+ /* PROGRESS BAR */
+ .progress-bar {
+ background: #ddd;
+ border-radius: 20px;
+ height: 6px;
+ margin-bottom: 24px;
+ overflow: hidden;
+ }
+ .progress-fill {
+ height: 100%;
+ background: linear-gradient(90deg, var(--blue), var(--purple));
+ border-radius: 20px;
+ transition: width 0.4s ease;
+ }
+
+ /* TWO COLUMN */
+ .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+ @media (max-width: 600px) {
+ .two-col { grid-template-columns: 1fr; }
+ .breakdown-row { grid-template-columns: 1fr; }
+ .content { padding: 20px 16px 30px 16px; }
+ .header h1 { font-size: 2rem; }
+ .topic-title { font-size: 1.8rem; }
+ .tab-btn { font-size: 0.88rem; padding: 5px 11px; }
+ }
+
+ /* ANCHOR */
+ .anchor-row {
+ display: flex; align-items: flex-start; gap: 8px;
+ margin: 4px 0; font-size: 1rem;
+ }
+ .anchor-arrow { color: var(--orange); font-weight: 700; flex-shrink: 0; }
+</style></head><body><div class="header"><h1>React Hooks — Study Notes</h1><div class="subtitle">Beginner-friendly notes, explained clearly</div><div class="badge">HTML · CSS · JS → React</div></div><div class="tab-bar" id="tabBar"><button class="tab-btn active" onclick="showTopic(0)" data-num="1">useState<span class="tab-num">1</span></button><button class="tab-btn" onclick="showTopic(1)" data-num="2">useEffect<span class="tab-num">2</span></button><button class="tab-btn" onclick="showTopic(2)" data-num="3">Props<span class="tab-num">3</span></button><button class="tab-btn" onclick="showTopic(3)" data-num="4">Lifecycle<span class="tab-num">4</span></button><button class="tab-btn" onclick="showTopic(4)" data-num="5">useContext<span class="tab-num">5</span></button><button class="tab-btn" onclick="showTopic(5)" data-num="6">Router<span class="tab-num">6</span></button><button class="tab-btn" onclick="showTopic(6)" data-num="7">useRef<span class="tab-num">7</span></button><button class="tab-btn" onclick="showTopic(7)" data-num="8">Custom Hooks<span class="tab-num">8</span></button></div><div class="notebook"><div class="spiral-holes" id="holes"></div><div class="content"><!-- ═══════════════════════════════════════════════════
+ TOPIC 1: useState
+ ═══════════════════════════════════════════════════ --><div class="topic-page active" id="topic-0"><div class="topic-header"><div class="topic-eyebrow">Topic 01 of 8</div><div class="topic-title">useState Hook</div><div class="topic-sub">The way to store data in React</div></div><div class="section"><div class="section-title">What is it?</div><div class="box box-blue"><div class="box-label">Simple Definition</div><p><span class="hl-y">useState</span> is a <strong>React Hook</strong> that gives us the power to <strong>store data (variables)</strong> inside a component — and whenever that data changes, <strong>the screen automatically updates!</strong></p><br/><p class="arrow">→ Change a normal JavaScript variable → the screen does nothing.</p><p class="arrow">→ Change a useState variable → React re-renders the screen.</p></div><div class="trick">Think of useState as a <strong>Magic Board</strong> — write something on the board, and it automatically shows up on the wall (screen). Erase the board → the wall updates too!</div></div><div class="section"><div class="section-title">Why do we use it?</div><div class="two-col"><div class="box box-red"><div class="box-label">Without useState</div><ul><li>Data changes</li><li>Screen stays the same</li><li>User sees nothing</li></ul></div><div class="box box-green"><div class="box-label">With useState</div><ul><li>Data changes</li><li>React notices</li><li>Screen updates instantly!</li></ul></div></div><p><strong>Real cases:</strong> Counter, Login form, Dark mode toggle, Shopping cart</p></div><div class="section"><div class="section-title">Real Life Example</div><div class="box box-yellow"><div class="box-label">Example</div><p>Imagine you want to build a <strong>like button</strong> (like on Instagram). When the user clicks, the likes increase. This is exactly what useState does!</p><p class="arrow">→ Likes = state (data)</p><p class="arrow">→ Button click = state change</p><p class="arrow">→ Screen update = React magic</p></div></div><div class="section"><div class="section-title">Syntax + Code</div><div class="code-wrap"><div class="code-header"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>&nbsp;Counter.jsx</div>
+ <pre><span class="kw">import</span> React, { useState } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">Counter</span>() {
+  <span class="cm">// Declare useState</span>
+  <span class="kw">const</span> [count, setCount] = useState(<span class="num">0</span>);
+  <span class="cm">//        ↑      ↑            ↑</span>
+  <span class="cm">//    variable  updater   initial value</span>
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">h2</span>&gt;Count: {count}&lt;/<span class="tag">h2</span>&gt;
+      &lt;<span class="tag">button</span> <span class="attr">onClick</span>={() =&gt; setCount(count + <span class="num">1</span>)}&gt;
+        +1 Increase
+      &lt;/<span class="tag">button</span>&gt;
+      &lt;<span class="tag">button</span> <span class="attr">onClick</span>={() =&gt; setCount(<span class="num">0</span>)}&gt;
+        Reset
+      &lt;/<span class="tag">button</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}
+
+<span class="kw">export default</span> Counter;</pre>
+ </div></div><div class="section"><div class="section-title">Code Breakdown</div><div class="breakdown-row"><div class="breakdown-code">import {`{ useState }`} from 'react'</div><div class="breakdown-exp">Import the useState hook from the React library — this is required first!</div></div><div class="breakdown-row"><div class="breakdown-code">const [count, setCount] = useState(0)</div><div class="breakdown-exp">Array destructuring: count = current value, setCount = the function to change the value, 0 = starting value</div></div><div class="breakdown-row"><div class="breakdown-code">{count}</div><div class="breakdown-exp">Show the value of count inside curly braces in JSX</div></div><div class="breakdown-row"><div class="breakdown-code">onClick={() => setCount(count + 1)}</div><div class="breakdown-exp">Call setCount on button click, add 1 to count</div></div><div class="breakdown-row"><div class="breakdown-code">setCount(0)</div><div class="breakdown-exp">Set count back to 0 (reset)</div></div><div class="box box-orange" style="margin-top:12px"><div class="box-label">Important Rule</div><p>You should <strong>NEVER change state directly</strong>: <code>count = count + 1</code></p><p>Always use a <strong>setter function</strong>: <code>setCount(count + 1)</code></p></div></div><div class="section"><div class="section-title">Common Beginner Mistakes</div><div class="mistake"><div class="mistake-q">Writing count = count + 1 directly</div><div class="mistake-a">Always use setCount(count + 1). Direct modification doesn't let React know.</div></div><div class="mistake"><div class="mistake-q">Writing useState inside an if/loop</div><div class="mistake-a">Always write useState at the top of the component — that's what React's "Rules of Hooks" says.</div></div><div class="mistake"><div class="mistake-q">const [count] = useState(0) — forgetting the setter</div><div class="mistake-a">You need to write both: const [count, setCount]</div></div><div class="mistake"><div class="mistake-q">Not importing first</div><div class="mistake-a">import React, &#123; useState &#125; from 'react'; — this line must be written FIRST</div></div></div><div class="section"><div class="section-title">Interview Questions</div><div class="qa-item"><div class="q">What is useState?</div><div class="a">A React Hook that lets you manage state in a functional component. When state changes, the component re-renders.</div></div><div class="qa-item"><div class="q">What's the difference between state and a variable?</div><div class="a">When a normal variable changes, the screen doesn't update. When state changes, React automatically re-renders the component.</div></div><div class="qa-item"><div class="q">What can the initial value of useState be?</div><div class="a">Anything — number, string, boolean, array, object, null. For example: useState([]), useState(&#123;&#125;), useState(false)</div></div><div class="qa-item"><div class="q">Why don't we change state directly?</div><div class="a">Because then React doesn't re-render. Calling the setter function signals React that the screen needs to update.</div></div></div><div class="revision"><h3>Quick Revision — useState</h3><ul><li>useState = the hook for storing state</li><li>Syntax: <code>const [value, setValue] = useState(initialValue)</code></li><li>Change state → React updates the screen</li><li>NEVER mutate directly, always use the setter</li><li>Write it at the top of the component, never inside a loop/if</li></ul></div></div><!-- ═══════════════════════════════════════════════════
+ TOPIC 2: useEffect
+ ═══════════════════════════════════════════════════ --><div class="topic-page" id="topic-1"><div class="topic-header"><div class="topic-eyebrow">Topic 02 of 8</div><div class="topic-title">useEffect Hook</div><div class="topic-sub">The way to handle side effects</div></div><div class="section"><div class="section-title">What is it?</div><div class="box box-blue"><div class="box-label">Simple Definition</div><p><span class="hl-y">useEffect</span> is a hook that tells React: <strong>"Do this task — AFTER rendering"</strong></p><p style="margin-top:8px">Side effects means: making an API call, setting a timer, adding an event listener, changing the document title — basically, <strong>work outside of React</strong></p></div><div class="trick">useEffect = <strong>"the bodyguard that runs after rendering"</strong> — it handles the behind-the-scenes work for React (API, timers, DOM changes)</div></div><div class="section"><div class="section-title">Real Life Example</div><div class="box box-yellow"><div class="box-label">Example</div><p>Imagine a page that needs to show news. After the page loads, news needs to be fetched from the server.</p><p class="arrow">→ Page rendered</p><p class="arrow">→ useEffect ran</p><p class="arrow">→ News came from the API</p><p class="arrow">→ setNews was called → screen updates!</p></div></div><div class="section"><div class="section-title">Syntax — 3 Forms</div><div class="code-wrap"><div class="code-header"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>&nbsp;useEffect — 3 tarike</div>
+ <pre><span class="kw">import</span> { useEffect, useState } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cm">// ── FORM 1: Runs after every render ──</span>
+useEffect(() =&gt; {
+  console.log(<span class="str">'I run on every render!'</span>);
+}); <span class="cm">// no dependency array</span>
+
+<span class="cm">// ── FORM 2: Only once (on mount) ──</span>
+useEffect(() =&gt; {
+  console.log(<span class="str">'Only once — on page load!'</span>);
+  <span class="cm">// Make the API call here</span>
+}, []); <span class="cm">// empty array = only on mount</span>
+
+<span class="cm">// ── FORM 3: On specific value change ──</span>
+useEffect(() =&gt; {
+  console.log(<span class="str">'count changed!'</span>);
+}, [count]); <span class="cm">// runs only when count changes</span></pre>
+ </div><div class="code-wrap"><div class="code-header"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>&nbsp;Full Example — API Fetch</div>
+ <pre><span class="kw">function</span> <span class="fn">NewsPage</span>() {
+  <span class="kw">const</span> [news, setNews] = useState([]);
+  <span class="kw">const</span> [loading, setLoading] = useState(<span class="kw">true</span>);
+
+  useEffect(() =&gt; {
+    <span class="cm">// This will run after the page loads</span>
+    fetch(<span class="str">'https://api.example.com/news'</span>)
+      .then(res =&gt; res.json())
+      .then(data =&gt; {
+        setNews(data);
+        setLoading(<span class="kw">false</span>);
+      });
+  }, []); <span class="cm">// [] = only once</span>
+
+  <span class="kw">if</span> (loading) <span class="kw">return</span> &lt;<span class="tag">p</span>&gt;Loading...&lt;/<span class="tag">p</span>&gt;;
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">ul</span>&gt;
+      {news.map(item =&gt; (
+        &lt;<span class="tag">li</span> <span class="attr">key</span>={item.id}&gt;{item.title}&lt;/<span class="tag">li</span>&gt;
+      ))}
+    &lt;/<span class="tag">ul</span>&gt;
+  );
+}</pre>
+ </div></div><div class="section"><div class="section-title">Code Breakdown</div><div class="breakdown-row"><div class="breakdown-code">useEffect(() => &#123; ... &#125;, [])</div><div class="breakdown-exp">Run only once after the component appears on screen (like componentDidMount in classes)</div></div><div class="breakdown-row"><div class="breakdown-code">fetch(...).then(...)</div><div class="breakdown-exp">Request data from the internet, handle it with a promise chain</div></div><div class="breakdown-row"><div class="breakdown-code">setNews(data)</div><div class="breakdown-exp">Put the data received from the API into state → screen updates</div></div><div class="breakdown-row"><div class="breakdown-code">setLoading(false)</div><div class="breakdown-exp">Turn off the loading state → remove the "Loading..." message</div></div><div class="box box-purple" style="margin-top:14px"><div class="box-label">Cleanup Function</div><p>Some effects need to be shut down (timers, event listeners):</p><div class="code-wrap" style="margin-top:8px"><div class="code-header"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>&nbsp;Cleanup</div>
+ <pre>useEffect(() =&gt; {
+  <span class="kw">const</span> timer = setInterval(() =&gt; {
+    console.log(<span class="str">'tick'</span>);
+  }, <span class="num">1000</span>);
+
+  <span class="kw">return</span> () =&gt; clearInterval(timer); <span class="cm">// cleanup</span>
+}, []);</pre>
+ </div></div></div><div class="section"><div class="section-title">Common Mistakes</div><div class="mistake"><div class="mistake-q">Forgetting the dependency array → Infinite loop!</div><div class="mistake-a">Always write [] or [variable] — otherwise it'll run on every render</div></div><div class="mistake"><div class="mistake-q">Writing an async function directly inside useEffect</div><div class="mistake-a">Create a separate async function inside and call it</div></div><div class="mistake"><div class="mistake-q">Forgetting cleanup (memory leak!)</div><div class="mistake-a">Always write return () => cleanup() for timers and subscriptions</div></div></div><div class="section"><div class="section-title">Interview Questions</div><div class="qa-item"><div class="q">Why do we use useEffect?</div><div class="a">To handle side effects — API calls, timers, subscriptions — work that's outside React's rendering.</div></div><div class="qa-item"><div class="q">What's the difference between [] and [count]?</div><div class="a">[] = runs only once (on mount). [count] = runs only when the value of count changes.</div></div><div class="qa-item"><div class="q">When is a cleanup function necessary?</div><div class="a">When using setInterval, setTimeout, an event listener, or a subscription — they must be cleared on unmount, otherwise there's a memory leak.</div></div></div><div class="revision"><h3>Quick Revision — useEffect</h3><ul><li>useEffect = run side effects after rendering</li><li>[] = only once | [x] = when x changes | no array = every time</li><li>API calls, timers, listeners = useEffect's job</li><li>Cleanup: return () => &#123; ... &#125; — avoid memory leaks</li><li>Don't write an async function directly, create one inside</li></ul></div></div><!-- ═══════════════════════════════════════════════════
+ TOPIC 3: Props & PropTypes
+ ═══════════════════════════════════════════════════ --><div class="topic-page" id="topic-2"><div class="topic-header"><div class="topic-eyebrow">Topic 03 of 8</div><div class="topic-title">Props & PropTypes</div><div class="topic-sub">The way to send data to components</div></div><div class="section"><div class="section-title">What is it?</div><div class="box box-blue"><div class="box-label">Simple Definition</div><p><span class="hl-y">Props</span> (Properties) = the <strong>way to send data</strong> from a parent component to a child component.</p><p style="margin-top:8px">Just like you pass arguments to a function — that's how you pass props to a component!</p><p class="arrow">→ Props always flow <strong>Parent → Child</strong> (one-way)</p><p class="arrow">→ Child <strong>cannot change</strong> props (read-only)</p></div><div class="trick">Props = a <strong>Tiffin Box</strong>. Mom (parent) sends food, the child eats it. The child can't change the food!</div></div><div class="section"><div class="section-title">Syntax + Code</div><div class="code-wrap"><div class="code-header"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>&nbsp;Props Example</div>
+ <pre><span class="cm">// ── Child Component ──</span>
+<span class="kw">function</span> <span class="fn">WelcomeCard</span>({ name, age, city }) {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span> <span class="attr">className</span>=<span class="str">"card"</span>&gt;
+      &lt;<span class="tag">h2</span>&gt;Hello, {name}! &lt;/<span class="tag">h2</span>&gt;
+      &lt;<span class="tag">p</span>&gt;Age: {age} years&lt;/<span class="tag">p</span>&gt;
+      &lt;<span class="tag">p</span>&gt;City: {city}&lt;/<span class="tag">p</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}
+
+<span class="cm">// ── Parent Component ──</span>
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">WelcomeCard</span>
+        <span class="attr">name</span>=<span class="str">"Rahul"</span>
+        <span class="attr">age</span>={<span class="num">22</span>}
+        <span class="attr">city</span>=<span class="str">"Delhi"</span>
+      /&gt;
+      &lt;<span class="tag">WelcomeCard</span>
+        <span class="attr">name</span>=<span class="str">"Priya"</span>
+        <span class="attr">age</span>={<span class="num">19</span>}
+        <span class="attr">city</span>=<span class="str">"Mumbai"</span>
+      /&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+ </div></div><div class="section"><div class="section-title">Code Breakdown</div><div class="breakdown-row"><div class="breakdown-code">function WelcomeCard(&#123; name, age, city &#125;)</div><div class="breakdown-exp">Destructure props and use them directly — cleaner code</div></div><div class="breakdown-row"><div class="breakdown-code">name="Rahul"</div><div class="breakdown-exp">String props — write them in quotes</div></div><div class="breakdown-row"><div class="breakdown-code">age=&#123;22&#125;</div><div class="breakdown-exp">Number props — write them in curly braces</div></div><div class="breakdown-row"><div class="breakdown-code">&#123;name&#125; JSX mein</div><div class="breakdown-exp">Display the prop's value using curly braces</div></div></div><div class="section"><div class="section-title">PropTypes — Type Safety</div><div class="box box-purple"><div class="box-label">What is PropTypes?</div><p>PropTypes ensures the <strong>right type of data</strong> reaches the component. If the wrong type is passed, a warning shows up in the console!</p></div><div class="code-wrap"><div class="code-header"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>&nbsp;PropTypes Example</div>
+ <pre><span class="kw">import</span> PropTypes <span class="kw">from</span> <span class="str">'prop-types'</span>;
+
+<span class="kw">function</span> <span class="fn">WelcomeCard</span>({ name, age, city }) {
+  <span class="kw">return</span> &lt;<span class="tag">h2</span>&gt;{name} - {age} - {city}&lt;/<span class="tag">h2</span>&gt;;
+}
+
+<span class="cm">// Type validation</span>
+WelcomeCard.propTypes = {
+  name: PropTypes.string.isRequired,  <span class="cm">// string + required</span>
+  age:  PropTypes.number,             <span class="cm">// number (optional)</span>
+  city: PropTypes.string,             <span class="cm">// string (optional)</span>
+};
+
+<span class="cm">// Default values</span>
+WelcomeCard.defaultProps = {
+  city: <span class="str">'India'</span>,
+  age:  <span class="num">18</span>,
+};</pre>
+ </div></div><div class="section"><div class="section-title">Common Mistakes</div><div class="mistake"><div class="mistake-q">Using props.name directly without destructuring</div><div class="mistake-a">Writing &#123; name, age &#125; in the function parameter is cleaner</div></div><div class="mistake"><div class="mistake-q">Changing props in the child (props.name = "new")</div><div class="mistake-a">Props are read-only! Use state if you need to change something</div></div><div class="mistake"><div class="mistake-q">Passing a number in quotes: age="22"</div><div class="mistake-a">Pass numbers in curly braces: age=&#123;22&#125;</div></div></div><div class="section"><div class="section-title">Interview Questions</div><div class="qa-item"><div class="q">What's the difference between Props and State?</div><div class="a">Props come from the parent and are read-only. State lives inside the component and can change.</div></div><div class="qa-item"><div class="q">Why are props one-way?</div><div class="a">Data flow stays predictable — parent to child only. This makes debugging easier.</div></div><div class="qa-item"><div class="q">Why do we use PropTypes?</div><div class="a">For runtime type checking — if the wrong type is passed, you get a warning, so bugs are found faster.</div></div></div><div class="revision"><h3>Quick Revision — Props</h3><ul><li>Props = data from Parent to Child</li><li>One-way flow: Parent → Child only</li><li>Read-only — child cannot change it</li><li>String = "value", Number/Boolean = &#123;value&#125;</li><li>PropTypes = type safety + defaultProps = backup values</li></ul></div></div><!-- ═══════════════════════════════════════════════════
+ TOPIC 4: Component Lifecycle
+ ═══════════════════════════════════════════════════ --><div class="topic-page" id="topic-3"><div class="topic-header"><div class="topic-eyebrow">Topic 04 of 8</div><div class="topic-title">Component Lifecycle</div><div class="topic-sub">The phases of a component's life</div></div><div class="section"><div class="section-title">What is it?</div><div class="box box-blue"><div class="box-label">Simple Definition</div><p>Every React component has a <strong>"life"</strong> — appearing on screen, updating, and leaving the screen. These are called <span class="hl-y">Lifecycle Phases</span>.</p></div><div class="box box-green" style="margin-top:12px"><div class="box-label">3 Phases</div><div class="anchor-row"><div class="anchor-arrow">1</div><div><strong>Mount</strong> → the component appears on screen for the first time</div></div><div class="anchor-row"><div class="anchor-arrow">2</div><div><strong>Update</strong> → state or props change</div></div><div class="anchor-row"><div class="anchor-arrow">3</div><div><strong>Unmount</strong> → the component is removed from the screen</div></div></div><div class="trick">Lifecycle = <strong>a person's life</strong>: Being born (Mount) → Growing up/Changing (Update) → Dying (Unmount)</div></div><div class="section"><div class="section-title">Functional Components mein Lifecycle</div><p style="margin-bottom:10px"><strong>useEffect</strong> is used to manage lifecycle in functional components:</p><div class="code-wrap"><div class="code-header"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>&nbsp;Lifecycle with useEffect</div>
+ <pre><span class="kw">import</span> { useEffect, useState } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">LifecycleDemo</span>() {
+  <span class="kw">const</span> [count, setCount] = useState(<span class="num">0</span>);
+
+  <span class="cm">// ── 1. MOUNT: Only once, the first time ──</span>
+  useEffect(() =&gt; {
+    console.log(<span class="str">'Component mounted'</span>);
+
+    <span class="cm">// ── 3. UNMOUNT: On the way out ──</span>
+    <span class="kw">return</span> () =&gt; {
+      console.log(<span class="str">'Component unmounted'</span>);
+    };
+  }, []); <span class="cm">// empty array = only on mount/unmount</span>
+
+  <span class="cm">// ── 2. UPDATE: when count changes ──</span>
+  useEffect(() =&gt; {
+    console.log(<span class="str">'count updated'</span>, count);
+  }, [count]);
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">p</span>&gt;Count: {count}&lt;/<span class="tag">p</span>&gt;
+      &lt;<span class="tag">button</span> <span class="attr">onClick</span>={() =&gt; setCount(count + <span class="num">1</span>)}&gt;
+        Increase
+      &lt;/<span class="tag">button</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+ </div></div><div class="section"><div class="section-title">Class vs Functional Comparison</div><div class="two-col"><div class="box box-orange"><div class="box-label">Class Component (Purana)</div><ul><li>componentDidMount</li><li>componentDidUpdate</li><li>componentWillUnmount</li></ul></div><div class="box box-green"><div class="box-label">Functional (Naya)</div><ul><li>useEffect(fn, [])</li><li>useEffect(fn, [dep])</li><li>useEffect(() => return fn, [])</li></ul></div></div></div><div class="section"><div class="section-title">Interview Questions</div><div class="qa-item"><div class="q">How many phases does the React lifecycle have?</div><div class="a">3: Mount (appearing), Update (changing), Unmount (leaving).</div></div><div class="qa-item"><div class="q">What's the functional equivalent of componentDidMount?</div><div class="a">useEffect(() => &#123; ... &#125;, []) — with an empty dependency array.</div></div><div class="qa-item"><div class="q">When does the cleanup function run?</div><div class="a">Before the component unmounts — inside useEffect's return function.</div></div></div><div class="revision"><h3>Quick Revision — Lifecycle</h3><ul><li>Mount → useEffect(fn, [])</li><li>Update → useEffect(fn, [dep])</li><li>Unmount → return function inside useEffect</li><li>Class components had separate methods, now useEffect is enough</li></ul></div></div><!-- ═══════════════════════════════════════════════════
+ TOPIC 5: useContext
+ ═══════════════════════════════════════════════════ --><div class="topic-page" id="topic-4"><div class="topic-header"><div class="topic-eyebrow">Topic 05 of 8</div><div class="topic-title">useContext Hook</div><div class="topic-sub">The way to share global data</div></div><div class="section"><div class="section-title">What is it?</div><div class="box box-blue"><div class="box-label">Simple Definition</div><p><span class="hl-y">useContext</span> is a hook that lets you use <strong>"global data"</strong> directly in any component — without props drilling!</p><p class="arrow" style="margin-top:8px">→ Problem: needing to send a piece of data deep down through components</p><p class="arrow">→ Solution: store it in Context, anyone can use it</p></div><div class="trick">Context = a <strong>WhatsApp Group</strong>. The Admin (Provider) sends a message, all members (Consumer) read it directly — no need to forward it through people in between!</div></div><div class="section"><div class="section-title">Real Life — Props Drilling Problem</div><div class="box box-red"><div class="box-label">Props Drilling (Problem)</div><p>App → Header → Navbar → UserAvatar</p><p>Even if only UserAvatar needs the user's name, it still has to be passed through all three! Very tedious!</p></div><div class="box box-green" style="margin-top:8px"><div class="box-label">useContext (Solution)</div><p>Store the name in UserContext → UserAvatar can grab it directly!</p></div></div><div class="section"><div class="section-title">Syntax + Code</div><div class="code-wrap"><div class="code-header"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>&nbsp;useContext — Step by Step</div>
+ <pre><span class="kw">import</span> { createContext, useContext, useState } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cm">// ── STEP 1: Create the context ──</span>
+<span class="kw">const</span> UserContext = createContext(<span class="kw">null</span>);
+
+<span class="cm">// ── STEP 2: Wrap with Provider ──</span>
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">const</span> [user, setUser] = useState({ name: <span class="str">'Rahul'</span>, role: <span class="str">'Admin'</span> });
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">UserContext.Provider</span> <span class="attr">value</span>={user}&gt;
+      &lt;<span class="tag">Header</span> /&gt;
+      &lt;<span class="tag">Dashboard</span> /&gt;
+    &lt;/<span class="tag">UserContext.Provider</span>&gt;
+  );
+}
+
+<span class="cm">// ── STEP 3: Use in any child ──</span>
+<span class="kw">function</span> <span class="fn">UserAvatar</span>() {
+  <span class="kw">const</span> user = useContext(UserContext);
+  <span class="cm">// No props needed! Direct access </span>
+
+  <span class="kw">return</span> &lt;<span class="tag">div</span>&gt;Hello, {user.name}! ({user.role})&lt;/<span class="tag">div</span>&gt;;
+}</pre>
+ </div></div><div class="section"><div class="section-title">Code Breakdown</div><div class="breakdown-row"><div class="breakdown-code">createContext(null)</div><div class="breakdown-exp">Create a new context object, null = default value</div></div><div class="breakdown-row"><div class="breakdown-code">&lt;UserContext.Provider value=&#123;user&#125;&gt;</div><div class="breakdown-exp">Provider gives data to all children — whatever you put in the value prop, everyone gets it</div></div><div class="breakdown-row"><div class="breakdown-code">useContext(UserContext)</div><div class="breakdown-exp">Get the context's value directly in the child — no prop was passed!</div></div><div class="box box-yellow" style="margin-top:12px"><div class="box-label">Best Use Cases</div><ul><li>Theme (dark/light mode)</li><li>User authentication data</li><li>Language/locale settings</li><li>Shopping cart</li></ul></div></div><div class="section"><div class="section-title">Common Mistakes</div><div class="mistake"><div class="mistake-q">Writing createContext inside a component</div><div class="mistake-a">Always write it outside the component, at the top of the file</div></div><div class="mistake"><div class="mistake-q">Using context outside the Provider</div><div class="mistake-a">Wrap the component inside the Provider — only then will it get the value</div></div><div class="mistake"><div class="mistake-q">Putting all state into context</div><div class="mistake-a">Only use it for truly global data — keep local state in useState</div></div></div><div class="section"><div class="section-title">Interview Questions</div><div class="qa-item"><div class="q">Why do we use the Context API?</div><div class="a">To avoid props drilling — when data needs to be sent to deeply nested components.</div></div><div class="qa-item"><div class="q">What's the difference between Context and Redux?</div><div class="a">Context is for simple global state. Redux is for complex state management — time-travel debugging, middleware support.</div></div><div class="qa-item"><div class="q">What's the difference between createContext and useContext?</div><div class="a">createContext creates the context (once). useContext lets you get the context's value in any child component.</div></div></div><div class="revision"><h3>Quick Revision — useContext</h3><ul><li>Solves the props drilling problem</li><li>3 steps: createContext → Provider → useContext</li><li>Whatever is inside the Provider, that gets the value</li><li>Perfect for Theme, User, Language</li></ul></div></div><!-- ═══════════════════════════════════════════════════
+ TOPIC 6: React Router
+ ═══════════════════════════════════════════════════ --><div class="topic-page" id="topic-5"><div class="topic-header"><div class="topic-eyebrow">Topic 06 of 8</div><div class="topic-title">React Router</div><div class="topic-sub">Creating multi-page navigation</div></div><div class="section"><div class="section-title">What is it?</div><div class="box box-blue"><div class="box-label">Simple Definition</div><p><span class="hl-y">React Router</span> is a library that lets you create <strong>multiple pages/routes</strong> in a React app — without a page reload!</p><p class="arrow" style="margin-top:8px">→ /home → show the Home page</p><p class="arrow">→ /about → show the About page</p><p class="arrow">→ /profile/123 → show User 123's profile</p></div><div class="trick">React Router = a <strong>Metro Map</strong>. There are different stations (routes), and you can go straight to any station (page) without passing through all the others!</div></div><div class="section"><div class="section-title">Installation</div><div class="code-wrap"><div class="code-header"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>&nbsp;Terminal</div>
+ <pre>npm install react-router-dom</pre>
+ </div></div><div class="section"><div class="section-title">Syntax + Code</div><div class="code-wrap"><div class="code-header"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>&nbsp;App.jsx — Full Router Setup</div>
+ <pre><span class="kw">import</span> {
+  BrowserRouter,
+  Routes,
+  Route,
+  Link,
+  useParams,
+  useNavigate
+} <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+
+<span class="cm">// ── Pages ──</span>
+<span class="kw">function</span> <span class="fn">Home</span>()    { <span class="kw">return</span> &lt;<span class="tag">h1</span>&gt;Home page&lt;/<span class="tag">h1</span>&gt;; }
+<span class="kw">function</span> <span class="fn">About</span>()   { <span class="kw">return</span> &lt;<span class="tag">h1</span>&gt;ℹ About Us&lt;/<span class="tag">h1</span>&gt;; }
+<span class="kw">function</span> <span class="fn">NotFound</span>(){ <span class="kw">return</span> &lt;<span class="tag">h1</span>&gt; 404 — Page not found!&lt;/<span class="tag">h1</span>&gt;; }
+
+<span class="kw">function</span> <span class="fn">UserProfile</span>() {
+  <span class="kw">const</span> { id } = useParams(); <span class="cm">// Extract id from URL</span>
+  <span class="kw">return</span> &lt;<span class="tag">h1</span>&gt;User #{id}'s profile&lt;/<span class="tag">h1</span>&gt;;
+}
+
+<span class="cm">// ── Main App ──</span>
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">BrowserRouter</span>&gt;
+      &lt;<span class="tag">nav</span>&gt;
+        &lt;<span class="tag">Link</span> <span class="attr">to</span>=<span class="str">"/"</span>&gt;Home&lt;/<span class="tag">Link</span>&gt; |
+        &lt;<span class="tag">Link</span> <span class="attr">to</span>=<span class="str">"/about"</span>&gt;About&lt;/<span class="tag">Link</span>&gt;
+      &lt;/<span class="tag">nav</span>&gt;
+
+      &lt;<span class="tag">Routes</span>&gt;
+        &lt;<span class="tag">Route</span> <span class="attr">path</span>=<span class="str">"/"</span>           <span class="attr">element</span>={&lt;<span class="tag">Home</span> /&gt;} /&gt;
+        &lt;<span class="tag">Route</span> <span class="attr">path</span>=<span class="str">"/about"</span>     <span class="attr">element</span>={&lt;<span class="tag">About</span> /&gt;} /&gt;
+        &lt;<span class="tag">Route</span> <span class="attr">path</span>=<span class="str">"/user/:id"</span> <span class="attr">element</span>={&lt;<span class="tag">UserProfile</span> /&gt;} /&gt;
+        &lt;<span class="tag">Route</span> <span class="attr">path</span>=<span class="str">"*"</span>          <span class="attr">element</span>={&lt;<span class="tag">NotFound</span> /&gt;} /&gt;
+      &lt;/<span class="tag">Routes</span>&gt;
+    &lt;/<span class="tag">BrowserRouter</span>&gt;
+  );
+}</pre>
+ </div></div><div class="section"><div class="section-title">Code Breakdown</div><div class="breakdown-row"><div class="breakdown-code">&lt;BrowserRouter&gt;</div><div class="breakdown-exp">Wrap the whole app in this — the routing container</div></div><div class="breakdown-row"><div class="breakdown-code">&lt;Routes&gt;</div><div class="breakdown-exp">All routes are written here — only one matches</div></div><div class="breakdown-row"><div class="breakdown-code">path="/" element=&#123;&lt;Home /&gt;&#125;</div><div class="breakdown-exp">If the URL is / then show the Home component</div></div><div class="breakdown-row"><div class="breakdown-code">path="/user/:id"</div><div class="breakdown-exp">:id = dynamic parameter — can be any number/string</div></div><div class="breakdown-row"><div class="breakdown-code">useParams()</div><div class="breakdown-exp">Extract the dynamic value from the URL (like &#123; id: "42" &#125;)</div></div><div class="breakdown-row"><div class="breakdown-code">&lt;Link to="/about"&gt;</div><div class="breakdown-exp">Use this instead of a normal &lt;a&gt; tag — no page reload!</div></div><div class="breakdown-row"><div class="breakdown-code">path="*"</div><div class="breakdown-exp">If no route matches, show this 404 page</div></div></div><div class="section"><div class="section-title">useNavigate — Programmatic Navigation</div><div class="code-wrap"><div class="code-header"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>&nbsp;useNavigate</div>
+ <pre><span class="kw">function</span> <span class="fn">LoginPage</span>() {
+  <span class="kw">const</span> navigate = useNavigate();
+
+  <span class="kw">function</span> <span class="fn">handleLogin</span>() {
+    <span class="cm">// Send to home after login success</span>
+    navigate(<span class="str">'/'</span>);
+  }
+
+  <span class="kw">return</span> &lt;<span class="tag">button</span> <span class="attr">onClick</span>={handleLogin}&gt;Login&lt;/<span class="tag">button</span>&gt;;
+}</pre>
+ </div></div><div class="section"><div class="section-title">Common Mistakes</div><div class="mistake"><div class="mistake-q">Using &lt;a href="/about"&gt; instead of Link</div><div class="mistake-a">Use &lt;Link to="/about"&gt; — &lt;a&gt; causes a page reload!</div></div><div class="mistake"><div class="mistake-q">Using useNavigate outside BrowserRouter</div><div class="mistake-a">The whole app should be inside BrowserRouter</div></div><div class="mistake"><div class="mistake-q">Writing path="*" first among routes</div><div class="mistake-a">Always write the 404 route at the very bottom</div></div></div><div class="section"><div class="section-title">Interview Questions</div><div class="qa-item"><div class="q">What does React Router do?</div><div class="a">Handles multiple pages/views in a Single Page Application — the URL changes but the page doesn't reload.</div></div><div class="qa-item"><div class="q">What's the difference between Link and the &lt;a&gt; tag?</div><div class="a">Link is a React Router component that does client-side navigation. The &lt;a&gt; tag causes a full page reload.</div></div><div class="qa-item"><div class="q">How do you create dynamic routes?</div><div class="a">Write path="/user/:id" and extract the id with useParams().</div></div></div><div class="revision"><h3>Quick Revision — React Router</h3><ul><li>BrowserRouter → Routes → Route hierarchy</li><li>Use &lt;Link&gt;, not &lt;a&gt;</li><li>:id = dynamic parameter, extract with useParams()</li><li>useNavigate = navigation from code</li><li>path="*" = 404 page, at the very bottom</li></ul></div></div><!-- ═══════════════════════════════════════════════════
+ TOPIC 7: useRef
+ ═══════════════════════════════════════════════════ --><div class="topic-page" id="topic-6"><div class="topic-header"><div class="topic-eyebrow">Topic 07 of 8</div><div class="topic-title">useRef Hook</div><div class="topic-sub">DOM access + storing values without re-render</div></div><div class="section"><div class="section-title">What is it?</div><div class="box box-blue"><div class="box-label">Simple Definition</div><p><span class="hl-y">useRef</span> has 2 main jobs:</p><div class="anchor-row"><div class="anchor-arrow">1</div><div><strong>Directly accessing a DOM element</strong> (like focusing an input)</div></div><div class="anchor-row"><div class="anchor-arrow">2</div><div><strong>Storing a value without a re-render</strong> (like a timer ID)</div></div></div><div class="trick">useRef = a <strong>Sticky Note</strong> — write any value and stick it on. Changing the note doesn't repaint the room (screen)!</div></div><div class="section"><div class="section-title">Use Case 1: DOM Access</div><div class="code-wrap"><div class="code-header"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>&nbsp;Auto-focus input</div>
+ <pre><span class="kw">import</span> { useRef, useEffect } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">SearchBar</span>() {
+  <span class="kw">const</span> inputRef = useRef(<span class="kw">null</span>);
+
+  useEffect(() =&gt; {
+    <span class="cm">// Focus the input as soon as the page loads</span>
+    inputRef.current.focus();
+  }, []);
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">input</span>
+      <span class="attr">ref</span>={inputRef}        <span class="cm">// attach ref to the input</span>
+      <span class="attr">placeholder</span>=<span class="str">"Search..."</span>
+    /&gt;
+  );
+}</pre>
+ </div></div><div class="section"><div class="section-title">Use Case 2: Value Store (No Re-render)</div><div class="code-wrap"><div class="code-header"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>&nbsp;Timer with useRef</div>
+ <pre><span class="kw">import</span> { useRef, useState } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">Stopwatch</span>() {
+  <span class="kw">const</span> [seconds, setSeconds] = useState(<span class="num">0</span>);
+  <span class="kw">const</span> timerRef = useRef(<span class="kw">null</span>); <span class="cm">// store the timer ID</span>
+
+  <span class="kw">function</span> <span class="fn">start</span>() {
+    timerRef.current = setInterval(() =&gt; {
+      setSeconds(s =&gt; s + <span class="num">1</span>);
+    }, <span class="num">1000</span>);
+  }
+
+  <span class="kw">function</span> <span class="fn">stop</span>() {
+    clearInterval(timerRef.current); <span class="cm">// stop the timer</span>
+  }
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">p</span>&gt;{seconds} seconds&lt;/<span class="tag">p</span>&gt;
+      &lt;<span class="tag">button</span> <span class="attr">onClick</span>={start}&gt;▶ Start&lt;/<span class="tag">button</span>&gt;
+      &lt;<span class="tag">button</span> <span class="attr">onClick</span>={stop}&gt;⏹ Stop&lt;/<span class="tag">button</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+ </div></div><div class="section"><div class="section-title">Code Breakdown</div><div class="breakdown-row"><div class="breakdown-code">const inputRef = useRef(null)</div><div class="breakdown-exp">Create a ref, null = no DOM element initially</div></div><div class="breakdown-row"><div class="breakdown-code">ref=&#123;inputRef&#125;</div><div class="breakdown-exp">Attach the ref to the input element — now inputRef.current = the input element</div></div><div class="breakdown-row"><div class="breakdown-code">inputRef.current.focus()</div><div class="breakdown-exp">Call DOM methods directly — focus, blur, click, all possible</div></div><div class="breakdown-row"><div class="breakdown-code">timerRef.current = setInterval(...)</div><div class="breakdown-exp">Store the timer ID in the ref — changing it won't trigger a re-render</div></div><div class="box box-yellow" style="margin-top:12px"><div class="box-label">useState vs useRef</div><div class="two-col"><div><p><strong>useState</strong><br/>Change → Re-render<br/>For UI values</p></div><div><p><strong>useRef</strong><br/>Change → NO Re-render<br/>DOM access + side values</p></div></div></div></div><div class="section"><div class="section-title">Common Mistakes</div><div class="mistake"><div class="mistake-q">Using useRef to trigger a re-render</div><div class="mistake-a">If you need a re-render, use useState — useRef doesn't update the screen</div></div><div class="mistake"><div class="mistake-q">Accessing ref.current before render</div><div class="mistake-a">Access it in useEffect or an event handler — the DOM is only ready after render</div></div></div><div class="section"><div class="section-title">Interview Questions</div><div class="qa-item"><div class="q">What's the difference between useRef and useState?</div><div class="a">useState triggers a re-render on change. useRef does NOT trigger a re-render on change. useRef is also used for DOM access.</div></div><div class="qa-item"><div class="q">What is .current in useRef?</div><div class="a">This holds the actual stored value — whether it's a DOM element or a variable. React manages this directly.</div></div></div><div class="revision"><h3>Quick Revision — useRef</h3><ul><li>DOM element access: ref attribute + inputRef.current.focus()</li><li>Value store: no re-render, the value lives in .current</li><li>Perfect for storing timer IDs, previous values</li><li>useState = need a screen update | useRef = just need the value</li></ul></div></div><!-- ═══════════════════════════════════════════════════
+ TOPIC 8: Custom Hooks
+ ═══════════════════════════════════════════════════ --><div class="topic-page" id="topic-7"><div class="topic-header"><div class="topic-eyebrow">Topic 08 of 8</div><div class="topic-title">Custom Hooks</div><div class="topic-sub">Creating your own custom hook</div></div><div class="section"><div class="section-title">What is it?</div><div class="box box-blue"><div class="box-label">Simple Definition</div><p><span class="hl-y">Custom Hook</span> = creating your own hook that contains <strong>reusable logic</strong>.</p><p class="arrow" style="margin-top:8px">→ When the same logic is used in many components</p><p class="arrow">→ Pull it out into a custom hook</p><p class="arrow">→ Use it from anywhere!</p><p style="margin-top:8px"><strong>Rule:</strong> A custom hook's name must always start with <span class="hl-y">"use"</span>! (useCounter, useFetch, useLocalStorage)</p></div><div class="trick">Custom Hook = <strong>your own Tool</strong>. Just like a carpenter makes their own custom tool that comes in handy again and again — you make your own hook the same way!</div></div><div class="section"><div class="section-title">Real Life Example</div><div class="box box-yellow"><div class="box-label">Problem without Custom Hook</div><p>If 5 different components need to fetch data from an API, you'd have to write the same useEffect + useState 5 times. So much repetition!</p><p style="margin-top:8px"><strong>Solution:</strong> create a custom hook called useFetch → write the logic just once</p></div></div><div class="section"><div class="section-title">Example 1 — useCounter</div><div class="code-wrap"><div class="code-header"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>&nbsp;useCounter.js</div>
+ <pre><span class="kw">import</span> { useState } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cm">// Custom Hook — name must start with "use"!</span>
+<span class="kw">function</span> <span class="fn">useCounter</span>(initialValue = <span class="num">0</span>) {
+  <span class="kw">const</span> [count, setCount] = useState(initialValue);
+
+  <span class="kw">const</span> <span class="fn">increment</span> = () =&gt; setCount(count + <span class="num">1</span>);
+  <span class="kw">const</span> <span class="fn">decrement</span> = () =&gt; setCount(count - <span class="num">1</span>);
+  <span class="kw">const</span> <span class="fn">reset</span>     = () =&gt; setCount(initialValue);
+
+  <span class="kw">return</span> { count, increment, decrement, reset };
+}
+
+<span class="cm">// ── Use in any component ──</span>
+<span class="kw">function</span> <span class="fn">ShoppingCart</span>() {
+  <span class="kw">const</span> { count, increment, decrement } = useCounter(<span class="num">0</span>);
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">button</span> <span class="attr">onClick</span>={decrement}&gt;-&lt;/<span class="tag">button</span>&gt;
+      &lt;<span class="tag">span</span>&gt;{count} items&lt;/<span class="tag">span</span>&gt;
+      &lt;<span class="tag">button</span> <span class="attr">onClick</span>={increment}&gt;+&lt;/<span class="tag">button</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+ </div></div><div class="section"><div class="section-title">Example 2 — useFetch (Real World)</div><div class="code-wrap"><div class="code-header"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>&nbsp;useFetch.js</div>
+ <pre><span class="kw">import</span> { useState, useEffect } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">useFetch</span>(url) {
+  <span class="kw">const</span> [data, setData]       = useState(<span class="kw">null</span>);
+  <span class="kw">const</span> [loading, setLoading] = useState(<span class="kw">true</span>);
+  <span class="kw">const</span> [error, setError]     = useState(<span class="kw">null</span>);
+
+  useEffect(() =&gt; {
+    fetch(url)
+      .then(res =&gt; res.json())
+      .then(d  =&gt; { setData(d);    setLoading(<span class="kw">false</span>); })
+      .catch(e =&gt; { setError(e);   setLoading(<span class="kw">false</span>); });
+  }, [url]);
+
+  <span class="kw">return</span> { data, loading, error };
+}
+
+<span class="cm">// ── Use it — so clean! ──</span>
+<span class="kw">function</span> <span class="fn">UserList</span>() {
+  <span class="kw">const</span> { data, loading, error } = useFetch(
+    <span class="str">'https://jsonplaceholder.typicode.com/users'</span>
+  );
+
+  <span class="kw">if</span> (loading) <span class="kw">return</span> &lt;<span class="tag">p</span>&gt;Loading...&lt;/<span class="tag">p</span>&gt;;
+  <span class="kw">if</span> (error)   <span class="kw">return</span> &lt;<span class="tag">p</span>&gt;Error aaya!&lt;/<span class="tag">p</span>&gt;;
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">ul</span>&gt;
+      {data.map(user =&gt; (
+        &lt;<span class="tag">li</span> <span class="attr">key</span>={user.id}&gt;{user.name}&lt;/<span class="tag">li</span>&gt;
+      ))}
+    &lt;/<span class="tag">ul</span>&gt;
+  );
+}</pre>
+ </div></div><div class="section"><div class="section-title">Code Breakdown</div><div class="breakdown-row"><div class="breakdown-code">function useFetch(url)</div><div class="breakdown-exp">Starts with "use" — this is a custom hook. Takes a url parameter</div></div><div class="breakdown-row"><div class="breakdown-code">return &#123; data, loading, error &#125;</div><div class="breakdown-exp">Return an object — the caller can destructure and use it</div></div><div class="breakdown-row"><div class="breakdown-code">const &#123; data, loading &#125; = useFetch(url)</div><div class="breakdown-exp">Call the custom hook like a normal function — magic!</div></div><div class="box box-green" style="margin-top:12px"><div class="box-label">Custom Hook Rules</div><ul><li>Name should always start with "use"</li><li>You can use other hooks inside</li><li>Only call it inside functional components</li><li>Don't call it inside a loop/if</li></ul></div></div><div class="section"><div class="section-title">Common Mistakes</div><div class="mistake"><div class="mistake-q">Not starting the name with "use" (like myHook)</div><div class="mistake-a">Always write useMyHook — so React knows this is a hook</div></div><div class="mistake"><div class="mistake-q">Calling a custom hook inside a regular function</div><div class="mistake-a">Only call it inside functional components or other hooks</div></div><div class="mistake"><div class="mistake-q">Creating a custom hook for everything</div><div class="mistake-a">Only create one when the same logic repeats in 2+ places</div></div></div><div class="section"><div class="section-title">Interview Questions</div><div class="qa-item"><div class="q">What is a custom hook?</div><div class="a">Your own hook that contains reusable logic. Its name starts with "use" and it can use other hooks.</div></div><div class="qa-item"><div class="q">What's the difference between a custom hook and a normal function?</div><div class="a">React hooks (useState, useEffect) can be used inside a custom hook. Not inside a normal function.</div></div><div class="qa-item"><div class="q">When should you create custom hooks?</div><div class="a">When the same logic repeats in 2 or more components — the DRY principle (Don't Repeat Yourself).</div></div><div class="qa-item"><div class="q">Does a custom hook share state?</div><div class="a">No! Each component keeps its own separate state. The hook only shares logic, not state.</div></div></div><div class="revision"><h3>Quick Revision — Custom Hooks</h3><ul><li>Start the name with "use" — a required rule!</li><li>Reusable logic = Custom Hook</li><li>useState, useEffect, everything can be used inside</li><li>State isn't shared — only logic is shared</li><li>Follow the DRY principle — write once, use repeatedly</li></ul></div></div></div><!-- /content --></div><!-- /notebook --><script>
+ // Generate spiral holes
+ const holes = document.getElementById('holes');
+ for (let i = 0; i < 20; i++) {
+ const h = document.createElement('div');
+ h.className = 'hole';
+ holes.appendChild(h);
+ }
+
+ function showTopic(idx) {
+ document.querySelectorAll('.topic-page').forEach((p, i) => {
+ p.classList.toggle('active', i === idx);
+ });
+ document.querySelectorAll('.tab-btn').forEach((b, i) => {
+ b.classList.toggle('active', i === idx);
+ });
+ document.querySelector('.notebook').scrollIntoView({ behavior: 'smooth', block: 'start' });
+ }
+</script></body></html>
